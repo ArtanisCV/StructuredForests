@@ -48,7 +48,6 @@ https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
 
 
 ## License
-I took some C++ codes from the Author's original implementation. Those codes are licensed under the 
-Simplified BSD License (see the Author's Github page).
+I took some C++ codes from the Author's original implementation. Those codes are licensed as the Author required (see the Author's Github page).
 
 For other codes, they are licensed under the IDC (I don't care) License. O(∩_∩)O.
