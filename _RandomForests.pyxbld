@@ -1,0 +1,10 @@
+def make_ext(modname, pyxfilename):
+    import numpy
+    from distutils.extension import Extension
+
+    return Extension(name=modname,
+                     sources=[pyxfilename, "_random_forests.cpp"],
+                     language="c++",
+                     libraries=["stdc++"],
+                     include_dirs=[numpy.get_include(), "."],
+                     extra_compile_args=["-std=c++11"])
