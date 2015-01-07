@@ -14,7 +14,7 @@ from utils import conv_tri, gradient
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': N.get_include()})
-from _StructuredForests import predict_core
+from _StructuredForests import predict_core, non_maximum_supr
 
 
 class StructuredForest(BaseStructuredForest):
@@ -47,6 +47,7 @@ class StructuredForest(BaseStructuredForest):
             stride: stride at which to compute edges
             sharpen: sharpening amount (can only decrease after training)
             n_tree_eval: number of trees to evaluate per location
+            nms: if true apply non-maximum suppression to edges
 
         :param model_dir: directory for model
             A trained model will contain
@@ -103,6 +104,7 @@ class StructuredForest(BaseStructuredForest):
         g_size = self.options["g_size"]
         n_cell = self.options["n_cell"]
         n_tree_eval = self.options["n_tree_eval"]
+        nms = self.options["nms"] if "nms" in self.options else False
         thrs = self.model["thrs"]
         fids = self.model["fids"]
         cids = self.model["cids"]
@@ -133,9 +135,19 @@ class StructuredForest(BaseStructuredForest):
             alpha = 1.4 * stride ** 2 / g_size ** 2 / n_tree_eval
 
         dst = N.minimum(dst * alpha, 1.0)
+        dst = conv_tri(dst, 1)[g_rad: src.shape[0] + g_rad,
+                               g_rad: src.shape[1] + g_rad]
 
-        return conv_tri(dst, 1)[g_rad: src.shape[0] + g_rad,
-                                g_rad: src.shape[1] + g_rad]
+        if nms:
+            dy, dx = N.gradient(conv_tri(dst, 4))
+            _, dxx = N.gradient(dx)
+            dyy, dxy = N.gradient(dy)
+            orientation = N.arctan2(dyy * N.sign(-dxy) + 1e-5, dxx)
+            orientation[orientation < 0] += N.pi
+
+            return non_maximum_supr(dst, orientation, 1, 5, 1.01)
+        else:
+            return dst
 
     def train(self, input_data):
         self.prepare_data(input_data)
@@ -516,6 +528,7 @@ if __name__ == "__main__":
         "stride": 2,
         "sharpen": 2,
         "n_tree_eval": 4,
+        "nms": True,
     }
 
     model = StructuredForest(options, rand=rand)

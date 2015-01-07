@@ -1,9 +1,10 @@
 StructuredForests
 =================
 
-A Python Implementation for Piotr's ICCV Paper "Structured Forests for Fast Edge Detection".
+A Python Implementation for Piotr's ICCV Paper "Structured Forests for Fast Edge Detection". The performance is almost
+the same as Piotr's original (Matlab) implementation.
 
-For the original (Matlab) implementation, please check the Author's Github Page:
+For the original implementation, please check the author's Github Page:
 https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
 .
 
@@ -12,8 +13,8 @@ https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
 * Platform:
   Ubuntu 14.04 + Anaconda is highly recommended.
   Nevertheless, I don't use any platform-dependent API. Hence the codes should work on Windows / Mac OS X as well.
-  The only problem is related to Cython: it may not be easy to setup Cython correctly on Windows, according to my previous
-  experience ╮(╯▽╰)╭. 
+  The only problem is related to Cython: it may not be easy to setup 64-bit Cython correctly on Windows, according to
+  my previous experience ╮(╯▽╰)╭.
 
 
 * Toy Demo:
@@ -39,15 +40,15 @@ https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
 
 ## What is missing
 * Multi-scale detection. However, implementing it should only require several lines of codes.
-* Non-maximum suppression.
 * Speed. I didn't strive for speed. The current implementation is slower than the Author's Matlab
   version, since only one thread is used, and there is no stochastic optimization like SSE. 
   Nonetheless, the speed is acceptable: for BSDS500, detection requires about 1.5s per testing image; 
   training requires about 9 hours.
-* No depth images. I never try the NYU depth dataset.
+* Depth images. I never tried the NYU depth dataset.
 
 
 ## License
-I took some C++ codes from the Author's original implementation. Those codes are licensed as the Author required (see the Author's Github page).
+I took some C++ codes from Piotr's original implementation. Those codes are licensed as the author required (see the
+author's Github page).
 
 For other codes, they are licensed under the IDC (I don't care) License. O(∩_∩)O.
