@@ -3,6 +3,7 @@
 * Copyright 2014 Piotr Dollar.  [pdollar-at-gmail.com]
 * Licensed under the Simplified BSD License [see external/bsd.txt]
 *******************************************************************************/
+
 #include <cstring>
 #include <cstdint>
 #include <cmath>

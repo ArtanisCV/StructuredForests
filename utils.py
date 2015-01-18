@@ -1,8 +1,11 @@
 __author__ = 'artanis'
 
 import cv2
-import numba
 import numpy as N
+
+import pyximport
+pyximport.install(setup_args={'include_dirs': N.get_include()})
+from _utils import histogram_core, pdist_core
 
 
 def resize(src, size):
@@ -54,10 +57,10 @@ def rgb2luv(src):
     y0 = 8.0 / a
     maxi = 1.0 / 270
 
-    table = [i / 1024.0 for i in xrange(1024)]
+    table = [i / 1024.0 for i in xrange(1025)]
     table = [116 * y ** (1.0 / 3.0) - 16 if y > y0 else y * a for y in table]
     table = [l * maxi for l in table]
-    table += table[-1:-41:-1]
+    table += [table[-1]] * 39
 
     rgb2xyz_mat = N.asarray([[0.430574, 0.222015, 0.020183],
                              [0.341550, 0.706655, 0.129553],
@@ -74,7 +77,7 @@ def rgb2luv(src):
     return luv.astype(src.dtype, copy=False)
 
 
-def gradient(src, norm_radius, norm_const=0.01):
+def gradient(src, norm_radius=0, norm_const=0.01):
     """
     Compute gradient magnitude and orientation at each image location.
 
@@ -96,7 +99,8 @@ def gradient(src, norm_radius, norm_const=0.01):
     idx_2 = N.argmax(magnitude, axis=2)
     idx_0, idx_1 = N.indices(magnitude.shape[:2])
     magnitude = magnitude[idx_0, idx_1, idx_2]
-    magnitude /= conv_tri(magnitude, norm_radius) + norm_const
+    if norm_radius != 0:
+        magnitude /= conv_tri(magnitude, norm_radius) + norm_const
     magnitude = magnitude.astype(src.dtype, copy=False)
 
     dx = dx[idx_0, idx_1, idx_2]
@@ -109,8 +113,7 @@ def gradient(src, norm_radius, norm_const=0.01):
     return magnitude, orientation
 
 
-@numba.autojit
-def histogram(magnitude, orientation, downscale, n_orient):
+def histogram(magnitude, orientation, downscale, n_orient, interp=False):
     """
     Compute oriented gradient histograms.
 
@@ -118,25 +121,18 @@ def histogram(magnitude, orientation, downscale, n_orient):
     :param orientation: gradient orientation
     :param downscale: spatially downscaling factor
     :param n_orient: number of orientation bins
+    :param interp: true for interpolation over orientations
     :return: oriented gradient histogram
     """
 
-    n_row, n_col = magnitude.shape
-    n_rbin = (n_row + downscale - 1) / downscale
-    n_cbin = (n_col + downscale - 1) / downscale
-    hist = N.zeros((n_rbin, n_cbin, n_orient), dtype=magnitude.dtype)
-    o_range = N.pi / n_orient
+    dtype = magnitude.dtype
+    magnitude = magnitude.astype(N.float64, copy=False)
+    orientation = orientation.astype(N.float64, copy=False)
 
-    for i in xrange(n_row):
-        for j in xrange(n_col):
-            r, c = i / downscale, j / downscale
-            o = int(round(orientation[i, j] / o_range)) % n_orient
-            hist[r, c, o] += magnitude[i, j] / downscale ** 2
-
-    return hist
+    hist = histogram_core(magnitude, orientation, downscale, n_orient, interp)
+    return hist.astype(dtype, copy=False)
 
 
-@numba.autojit
 def pdist(points):
     """
     Compute the pairwise differences between n-dimensional points in a way
@@ -147,19 +143,9 @@ def pdist(points):
     :return: pairwise differences
     """
 
+    dtype = points.dtype
     prefix_shape, (n_pt, n_dim) = points.shape[:-2], points.shape[-2:]
-    src = points.reshape((-1, n_pt, n_dim))
-    dst = N.zeros((src.shape[0], n_pt * (n_pt - 1) / 2, n_dim),
-                  dtype=points.dtype)
+    src = points.reshape((-1, n_pt, n_dim)).astype(N.float64, copy=False)
 
-    for i in xrange(dst.shape[0]):
-        n = 0
-
-        for j in xrange(n_pt):
-            for k in xrange(j + 1, n_pt):
-                for m in xrange(n_dim):
-                    dst[i, n, m] = src[i, j, m] - src[i, k, m]
-
-                n += 1
-
+    dst = pdist_core(src).astype(dtype, copy=False)
     return dst.reshape(prefix_shape + (n_pt * (n_pt - 1) / 2, n_dim))

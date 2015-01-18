@@ -1,6 +1,6 @@
 __author__ = 'artanis'
 
-
+import cv2
 import numpy as N
 from skimage.util import view_as_windows
 from utils import resize, conv_tri, rgb2luv, gradient, histogram, pdist
@@ -145,6 +145,10 @@ class BaseStructuredForest(object):
         return ss_ftr.reshape((ss_ftr.shape[0], -1))
 
     def get_features(self, src, smp_loc):
+        bottom, right = (4 - src.shape[0] % 4) % 4, (4 - src.shape[1] % 4) % 4
+        src = cv2.copyMakeBorder(src, 0, bottom, 0, right,
+                                 borderType=cv2.BORDER_REFLECT)
+
         reg_ch, ss_ch = self.get_shrunk_channels(src)
         smp_loc = self.get_shrunk_loc(smp_loc)
 

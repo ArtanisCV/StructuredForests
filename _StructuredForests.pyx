@@ -37,12 +37,12 @@ def build_feature_table(shrink, p_size, n_cell, n_ch):
            N.asarray(ss_tb, dtype=N.int32)
 
 
-def find_leaves(double[:, :, :] src, double[:, :, :] reg_ftr,
-                double[:, :, :] ss_ftr,
-                int shrink, int p_size, int g_size, int n_cell,
-                int stride, int n_tree_eval,
+def find_leaves(double[:, :, :] src, double[:, :, :] reg_ch,
+                double[:, :, :] ss_ch,
+                int shrink, int p_size, int g_size, int n_cell, int stride,
+                int n_tree_eval,
                 double[:, :] thrs, int[:, :] fids, int[:, :] cids):
-    cdef int n_ftr_ch = reg_ftr.shape[2]
+    cdef int n_ftr_ch = reg_ch.shape[2]
     cdef int height = src.shape[0] - p_size, width = src.shape[1] - p_size
     cdef int n_tree = cids.shape[0], n_node_per_tree = cids.shape[1]
     cdef int n_reg_dim = (p_size / shrink) ** 2 * n_ftr_ch
@@ -73,13 +73,13 @@ def find_leaves(double[:, :, :] src, double[:, :, :] reg_ftr,
                             y2 = ss_tb[ftr_idx - n_reg_dim, 3] + j / shrink
                             z = ss_tb[ftr_idx - n_reg_dim, 4]
 
-                            ftr = ss_ftr[x1, y1, z] - ss_ftr[x2, y2, z]
+                            ftr = ss_ch[x1, y1, z] - ss_ch[x2, y2, z]
                         else:
                             x1 = reg_tb[ftr_idx, 0] + i / shrink
                             y1 = reg_tb[ftr_idx, 1] + j / shrink
                             z = reg_tb[ftr_idx, 2]
 
-                            ftr = reg_ftr[x1, y1, z]
+                            ftr = reg_ch[x1, y1, z]
 
                         if ftr < thrs[tree_idx, node_idx]:
                             node_idx = cids[tree_idx, node_idx] - 1
@@ -147,8 +147,8 @@ def compose(double[:, :, :] src, int[:, :, :] lids,
                     mean[:] = 0.0
 
                     # compute color model for each segment using every other pixel
-                    for m from 0 <= m < g_size:
-                        for n from 0 <= n < g_size:
+                    for m from 0 <= m < g_size by 2:
+                        for n from 0 <= n < g_size by 2:
                             count[patch[m, n]] += 1.0
 
                             for p from 0 <= p < depth:
@@ -204,8 +204,8 @@ def compose(double[:, :, :] src, int[:, :, :] lids,
 
 
 def predict_core(N.ndarray[C_FLOAT64, ndim=3] src,
-                 N.ndarray[C_FLOAT64, ndim=3] reg_ftr,
-                 N.ndarray[C_FLOAT64, ndim=3] ss_ftr,
+                 N.ndarray[C_FLOAT64, ndim=3] reg_ch,
+                 N.ndarray[C_FLOAT64, ndim=3] ss_ch,
                  int shrink, int p_size, int g_size, int n_cell,
                  int stride, int sharpen, int n_tree_eval,
                  N.ndarray[C_FLOAT64, ndim=2] thrs,
@@ -222,7 +222,7 @@ def predict_core(N.ndarray[C_FLOAT64, ndim=3] src,
     cdef N.ndarray[C_INT32, ndim=3] lids
     cdef N.ndarray[C_FLOAT64, ndim=2] dst
 
-    lids = find_leaves(src, reg_ftr, ss_ftr, shrink, p_size, g_size, n_cell,
+    lids = find_leaves(src, reg_ch, ss_ch, shrink, p_size, g_size, n_cell,
                        stride, n_tree_eval, thrs, fids, cids)
 
     if sharpen == 0:
@@ -251,12 +251,12 @@ def predict_core(N.ndarray[C_FLOAT64, ndim=3] src,
     return dst
 
 
-cdef inline float bilinear_interp(double[:, :] I, float x, float y) nogil:
+cdef inline float bilinear_interp(double[:, :] img, float x, float y) nogil:
     """
-    Return I[y, x] via bilinear interpolation
+    Return img[y, x] via bilinear interpolation
     """
 
-    cdef int h = I.shape[0], w = I.shape[1]
+    cdef int h = img.shape[0], w = img.shape[1]
 
     if x < 0:
         x = 0
@@ -271,8 +271,8 @@ cdef inline float bilinear_interp(double[:, :] I, float x, float y) nogil:
     cdef int x0 = int(x), y0 = int(y), x1 = x0 + 1, y1 = y0 + 1
     cdef double dx0 = x - x0, dy0 = y - y0, dx1 = 1 - dx0, dy1 = 1 - dy0
 
-    return I[y0, x0] * dx1 * dy1 + I[y0, x1] * dx0 * dy1 + \
-           I[y1, x0] * dx1 * dy0 + I[y1, x1] * dx0 * dy0
+    return img[y0, x0] * dx1 * dy1 + img[y0, x1] * dx0 * dy1 + \
+           img[y1, x0] * dx1 * dy0 + img[y1, x1] * dx0 * dy0
 
 
 def non_maximum_supr(double[:, :] E0, double[:, :] O, int r, int s, double m):

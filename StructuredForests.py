@@ -18,7 +18,7 @@ from _StructuredForests import predict_core, non_maximum_supr
 
 
 class StructuredForest(BaseStructuredForest):
-    def __init__(self, options, model_dir='model/',
+    def __init__(self, options, model_dir="model/",
                  rand=N.random.RandomState(123)):
         """
         :param options:
@@ -72,6 +72,7 @@ class StructuredForest(BaseStructuredForest):
         self.data_prefix = "data_"
         self.tree_prefix = "tree_"
         self.forest_name = "forest.h5"
+        self.comp_filt = tables.Filters(complib="zlib", complevel=1)
 
         try:
             model_file = os.path.join(self.forest_dir, self.forest_name)
@@ -83,7 +84,7 @@ class StructuredForest(BaseStructuredForest):
         self.rand = rand
 
     def load_model(self, model_file):
-        with tables.open_file(model_file) as mfile:
+        with tables.open_file(model_file, filters=self.comp_filt) as mfile:
             model = {
                 "thrs": mfile.get_node("/thrs")[:],
                 "fids": mfile.get_node("/fids")[:],
@@ -118,21 +119,21 @@ class StructuredForest(BaseStructuredForest):
         pad = cv2.copyMakeBorder(src, p_rad, p_rad, p_rad, p_rad,
                                  borderType=cv2.BORDER_REFLECT)
 
-        reg_ftr, ss_ftr = self.get_shrunk_channels(pad)
+        reg_ch, ss_ch = self.get_shrunk_channels(pad)
 
         if sharpen != 0:
             pad = conv_tri(pad, 1)
 
-        dst = predict_core(pad, reg_ftr, ss_ftr, shrink, p_size, g_size,
-                           n_cell, stride, sharpen, n_tree_eval, thrs, fids,
-                           cids, n_seg, segs, edge_bnds, edge_pts)
+        dst = predict_core(pad, reg_ch, ss_ch, shrink, p_size, g_size, n_cell,
+                           stride, sharpen, n_tree_eval, thrs, fids, cids,
+                           n_seg, segs, edge_bnds, edge_pts)
 
         if sharpen == 0:
-            alpha = 2.6 * stride ** 2 / g_size ** 2 / n_tree_eval
+            alpha = 2.1 * stride ** 2 / g_size ** 2 / n_tree_eval
         elif sharpen == 1:
             alpha = 1.8 * stride ** 2 / g_size ** 2 / n_tree_eval
         else:
-            alpha = 1.4 * stride ** 2 / g_size ** 2 / n_tree_eval
+            alpha = 1.65 * stride ** 2 / g_size ** 2 / n_tree_eval
 
         dst = N.minimum(dst * alpha, 1.0)
         dst = conv_tri(dst, 1)[g_rad: src.shape[0] + g_rad,
@@ -145,9 +146,9 @@ class StructuredForest(BaseStructuredForest):
             orientation = N.arctan2(dyy * N.sign(-dxy) + 1e-5, dxx)
             orientation[orientation < 0] += N.pi
 
-            return non_maximum_supr(dst, orientation, 1, 5, 1.01)
-        else:
-            return dst
+            dst = non_maximum_supr(dst, orientation, 1, 5, 1.02) / 1.02
+
+        return dst
 
     def train(self, input_data):
         self.prepare_data(input_data)
@@ -234,10 +235,10 @@ class StructuredForest(BaseStructuredForest):
                 sys.stdout.flush()
             print
 
-            with tables.open_file(data_path, "w") as dfile:
-                dfile.create_array('/', 'ftrs', ftrs[:total])
-                dfile.create_array('/', 'lbls', lbls[:total])
-                dfile.create_array('/', 'sids', sids.astype(N.int32))
+            with tables.open_file(data_path, "w", filters=self.comp_filt) as dfile:
+                dfile.create_carray("/", "ftrs", obj=ftrs[:total])
+                dfile.create_carray("/", "lbls", obj=lbls[:total])
+                dfile.create_carray("/", "sids", obj=sids.astype(N.int32))
             print "Saving %d samples to '%s'..." % (total, data_file)
 
     def train_tree(self):
@@ -267,23 +268,23 @@ class StructuredForest(BaseStructuredForest):
                 print "Found Tree %d '%s', reusing..." % ((i + 1), tree_file)
                 continue
 
-            with tables.open_file(data_path) as dfile:
-                ftrs = dfile.get_node('/ftrs')[:]
-                lbls = dfile.get_node('/lbls')[:]
-                sids = dfile.get_node('/sids')[:]
+            with tables.open_file(data_path, filters=self.comp_filt) as dfile:
+                ftrs = dfile.get_node("/ftrs")[:]
+                lbls = dfile.get_node("/lbls")[:]
+                sids = dfile.get_node("/sids")[:]
 
                 forest = rf.train(ftrs, lbls)
                 thrs, probs, preds, fids, cids, counts, depths = forest[0]
                 fids[cids > 0] = sids[fids[cids > 0]]
 
-                with tables.open_file(tree_path, 'w') as tfile:
-                    tfile.create_array('/', 'fids', fids)
-                    tfile.create_array('/', 'thrs', thrs)
-                    tfile.create_array('/', 'cids', cids)
-                    tfile.create_array('/', 'probs', probs)
-                    tfile.create_array('/', 'segs', preds)
-                    tfile.create_array('/', 'counts', counts)
-                    tfile.create_array('/', 'depths', depths)
+                with tables.open_file(tree_path, "w", filters=self.comp_filt) as tfile:
+                    tfile.create_carray("/", "fids", obj=fids)
+                    tfile.create_carray("/", "thrs", obj=thrs)
+                    tfile.create_carray("/", "cids", obj=cids)
+                    tfile.create_carray("/", "probs", obj=probs)
+                    tfile.create_carray("/", "segs", obj=preds)
+                    tfile.create_carray("/", "counts", obj=counts)
+                    tfile.create_carray("/", "depths", obj=depths)
                     tfile.close()
 
                 sys.stdout.write("Processing Tree %d/%d\r" % (i + 1, n_tree))
@@ -312,11 +313,11 @@ class StructuredForest(BaseStructuredForest):
             tree_file = self.tree_prefix + str(i + 1) + ".h5"
             tree_path = os.path.join(self.tree_dir, tree_file)
 
-            with tables.open_file(tree_path) as mfile:
-                tree = {'fids': mfile.get_node('/fids')[:],
-                        'thrs': mfile.get_node('/thrs')[:],
-                        'cids': mfile.get_node('/cids')[:],
-                        'segs': mfile.get_node('/segs')[:]}
+            with tables.open_file(tree_path, filters=self.comp_filt) as mfile:
+                tree = {"fids": mfile.get_node("/fids")[:],
+                        "thrs": mfile.get_node("/thrs")[:],
+                        "cids": mfile.get_node("/cids")[:],
+                        "segs": mfile.get_node("/segs")[:]}
             trees.append(tree)
 
         max_n_node = 0
@@ -369,8 +370,7 @@ class StructuredForest(BaseStructuredForest):
                 if cids[i, j] != 0 or n_seg[i, j] <= 1:
                     continue
 
-                E = gradient(segs[i, j].astype(N.float64), norm_radius=0,
-                             norm_const=0.005)[0] > .01
+                E = gradient(segs[i, j].astype(N.float64))[0] > 0.01
                 E0 = 0
 
                 for k in xrange(n_bnd):
@@ -385,14 +385,14 @@ class StructuredForest(BaseStructuredForest):
         edge_pts = N.asarray(edge_pts, dtype=N.int32)
         edge_bnds = N.hstack(([0], N.cumsum(edge_bnds.flatten()))).astype(N.int32)
 
-        with tables.open_file(forest_path, 'w') as mfile:
-            mfile.create_array('/', 'thrs', thrs)
-            mfile.create_array('/', 'fids', fids)
-            mfile.create_array('/', 'cids', cids)
-            mfile.create_array('/', 'edge_bnds', edge_bnds)
-            mfile.create_array('/', 'edge_pts', edge_pts)
-            mfile.create_array('/', 'n_seg', n_seg)
-            mfile.create_array('/', 'segs', segs)
+        with tables.open_file(forest_path, "w", filters=self.comp_filt) as mfile:
+            mfile.create_carray("/", "thrs", obj=thrs)
+            mfile.create_carray("/", "fids", obj=fids)
+            mfile.create_carray("/", "cids", obj=cids)
+            mfile.create_carray("/", "edge_bnds", obj=edge_bnds)
+            mfile.create_carray("/", "edge_pts", obj=edge_pts)
+            mfile.create_carray("/", "n_seg", obj=n_seg)
+            mfile.create_carray("/", "segs", obj=segs)
             mfile.close()
 
         self.model = self.load_model(forest_path)
@@ -483,7 +483,7 @@ def bsds500_test(input_root, output_root):
         os.makedirs(output_root)
 
     image_dir = os.path.join(input_root, "BSDS500", "data", "images", "test")
-    file_names = filter(lambda name: name[-3:] == 'jpg', os.listdir(image_dir))
+    file_names = filter(lambda name: name[-3:] == "jpg", os.listdir(image_dir))
     n_image = len(file_names)
 
     for i, file_name in enumerate(file_names):
@@ -521,7 +521,7 @@ if __name__ == "__main__":
         "min_count": 1,
         "min_child": 8,
         "max_depth": 64,
-        "split": 'gini',
+        "split": "gini",
         "discretize": lambda lbls, n_class:
             discretize(lbls, n_class, n_sample=256, rand=rand),
 
