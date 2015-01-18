@@ -1,9 +1,7 @@
 StructuredForests
 =================
 
-## Versions
-
-### Version 1.1
+## Version 1.1
 
 Updates:
 * Use compression to reduce model size.
@@ -15,7 +13,7 @@ from the one outputted by Matlab's imread. Thus if you used Anaconda, you may co
 libjpeg by apt-get (for Ubuntu).
 
 
-### Version 1.0
+## Version 1.0
 
 A Python Implementation for Piotr's ICCV Paper "Structured Forests for Fast Edge Detection". The performance is almost
 the same as Piotr's original (Matlab) implementation.
@@ -25,7 +23,7 @@ https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
 .
 
 
-## How to use
+### How to use
 * Platform:
   Ubuntu 14.04 + Anaconda is highly recommended.
   Nevertheless, I don't use any platform-dependent API. Hence the codes should work on Windows / Mac OS X as well.
@@ -54,7 +52,7 @@ https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
       for training.
 
 
-## What is missing
+### What is missing
 * Multi-scale detection. However, implementing it should only require several lines of codes.
 * Speed. I didn't strive for speed. The current implementation is slower than the Author's Matlab
   version, since only one thread is used, and there is no stochastic optimization like SSE. 
@@ -63,7 +61,7 @@ https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
 * Depth images. I never tried the NYU depth dataset.
 
 
-## License
+### License
 I took some C++ codes from Piotr's original implementation. Those codes are licensed as the author required (see the
 author's Github page).
 
