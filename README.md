@@ -38,9 +38,12 @@ https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
   * Train 8 decision trees on the above features, and save them in "model/trees";
   * Merge trees to build the final model, and save it in "model/forests".
   * Use the trained model to detect edges for the testing data, and save them in "edges".
+  * **Note: Currently a model trained on the BSDS500 dataset is provided. If you don't remove it, only the last step of
+    the above will be executed.**
 
 
 * Actual Usage:
+    * I recommend you to try the provided model for prediction. If you want to train the model by yourself, keep reading.
     * Download the BSDS500 dataset from http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/, 
       and uncompress it. As a result, a directory named "BSR" is obtained, containing BSDS500, bench, and documentation.
     * Modify the bottom two lines in "StructuredForests.py" to: 

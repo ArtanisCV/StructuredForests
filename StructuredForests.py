@@ -63,6 +63,7 @@ class StructuredForest(BaseStructuredForest):
         """
 
         BaseStructuredForest.__init__(self, options)
+        assert self.options["g_size"] % 2 == 0
         assert self.options["stride"] % self.options["shrink"] == 0
 
         self.model_dir = model_dir
@@ -73,6 +74,8 @@ class StructuredForest(BaseStructuredForest):
         self.tree_prefix = "tree_"
         self.forest_name = "forest.h5"
         self.comp_filt = tables.Filters(complib="zlib", complevel=1)
+
+        self.trained = False
 
         try:
             model_file = os.path.join(self.forest_dir, self.forest_name)
@@ -94,6 +97,8 @@ class StructuredForest(BaseStructuredForest):
                 "n_seg": mfile.get_node("/n_seg")[:].flatten(),
                 "segs": mfile.get_node("/segs")[:],
             }
+
+            self.trained = True
 
         return model
 
@@ -151,6 +156,10 @@ class StructuredForest(BaseStructuredForest):
         return dst
 
     def train(self, input_data):
+        if self.trained:
+            print >> sys.stderr, "Model has been trained. Quit training."
+            return
+
         self.prepare_data(input_data)
         self.train_tree()
         self.merge_trees()

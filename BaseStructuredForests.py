@@ -18,14 +18,11 @@ class BaseStructuredForest(object):
             reg_smooth_rad: radius for reg channel smoothing
             ss_smooth_rad: radius for sim channel smoothing
             p_size: size of image patches
-            g_size: size of ground truth patches
             n_cell: number of self similarity cells
         """
 
         self.options = options
-
         assert self.options["p_size"] % 2 == 0
-        assert self.options["g_size"] % 2 == 0
 
     def get_ftr_dim(self):
         shrink = self.options["shrink"]
