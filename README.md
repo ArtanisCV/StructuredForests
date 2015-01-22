@@ -43,7 +43,8 @@ https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
 
 
 * Actual Usage:
-    * I recommend you to try the provided model for prediction. If you want to train the model by yourself, keep reading.
+    * You can use the provided model for prediction. If you want to train the model by yourself, remove the provided model
+      and keep reading.
     * Download the BSDS500 dataset from http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/, 
       and uncompress it. As a result, a directory named "BSR" is obtained, containing BSDS500, bench, and documentation.
     * Modify the bottom two lines in "StructuredForests.py" to: 
