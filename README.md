@@ -58,7 +58,7 @@ http://research.microsoft.com/en-us/um/people/larryz/publications.htm
 
 ### What is missing
 * Multi-scale detection. However, implementing it should only require several lines of codes.
-* Speed. I didn't strive for speed. The current implementation is slower than the Author's Matlab
+* Speed. I didn't strive for speed. The current implementation is slower than the author's Matlab
   version, since only one thread is used, and there is no stochastic optimization like SSE. 
   Nonetheless, the speed is acceptable: for BSDS500, detection requires about 1.0s per testing image;
   training requires about 11 hours.
