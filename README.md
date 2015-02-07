@@ -18,8 +18,8 @@ libjpeg by apt-get (for Ubuntu).
 A Python Implementation for Piotr's ICCV Paper "Structured Forests for Fast Edge Detection". The performance is almost
 the same as Piotr's original (Matlab) implementation.
 
-For the original implementation, please check the author's Github Page:
-https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
+For the original implementation, please check the author's webpage:
+http://research.microsoft.com/en-us/um/people/larryz/publications.htm
 .
 
 
@@ -67,6 +67,6 @@ https://github.com/s-gupta/rcnn-depth/tree/master/structured-edges
 
 ### License
 I took some C++ codes from Piotr's original implementation. Those codes are licensed as the author required (see the
-author's Github page).
+author's webpage).
 
 For other codes, they are licensed under the IDC (I don't care) License. O(∩_∩)O.
