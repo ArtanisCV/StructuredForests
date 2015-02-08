@@ -6,7 +6,7 @@ from skimage.util import view_as_windows
 from utils import resize, conv_tri, rgb2luv, gradient, histogram, pdist
 
 
-class BaseStructuredForest(object):
+class BaseStructuredForests(object):
     def __init__(self, options):
         """
         :param options:

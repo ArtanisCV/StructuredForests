@@ -9,7 +9,8 @@ Updates:
 * Finetune some parameters to slightly improve accuracy.
 
 It seems the libjpeg package installed by Anaconda has some bugs in decoding images. The decoding result is different
-from the one outputted by Matlab's imread. Thus if you used Anaconda, you may consider uninstalling libjpeg and re-installing it by apt-get (for Ubuntu).
+from the one outputted by Matlab's imread. Thus if you used Anaconda, you may consider uninstalling libjpeg and
+re-installing it by apt-get (for Ubuntu).
 
 
 ## Version 1.0
@@ -42,8 +43,8 @@ http://research.microsoft.com/en-us/um/people/larryz/publications.htm
 
 
 * Actual Usage:
-    * You can use the provided model for prediction. If you want to train the model by yourself, remove the provided model
-      and keep reading.
+    * You can use the provided model for prediction. If you want to train the model by yourself, remove the provided
+      model and keep reading.
     * Download the BSDS500 dataset from http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/, 
       and uncompress it. As a result, a directory named "BSR" is obtained, containing BSDS500, bench, and documentation.
     * Modify the bottom two lines in "StructuredForests.py" to: 

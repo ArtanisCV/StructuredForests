@@ -7,7 +7,7 @@ import cv2
 import numpy as N
 from math import floor, ceil, log
 from scipy.ndimage.morphology import distance_transform_edt
-from BaseStructuredForests import BaseStructuredForest
+from BaseStructuredForests import BaseStructuredForests
 from RandomForests import RandomForest
 from RobustPCA import robust_pca
 from utils import conv_tri, gradient
@@ -17,7 +17,7 @@ pyximport.install(setup_args={'include_dirs': N.get_include()})
 from _StructuredForests import predict_core, non_maximum_supr
 
 
-class StructuredForest(BaseStructuredForest):
+class StructuredForests(BaseStructuredForests):
     def __init__(self, options, model_dir="model/",
                  rand=N.random.RandomState(123)):
         """
@@ -62,7 +62,7 @@ class StructuredForest(BaseStructuredForest):
         :param rand: random number generator
         """
 
-        BaseStructuredForest.__init__(self, options)
+        BaseStructuredForests.__init__(self, options)
         assert self.options["g_size"] % 2 == 0
         assert self.options["stride"] % self.options["shrink"] == 0
 
@@ -540,6 +540,6 @@ if __name__ == "__main__":
         "nms": True,
     }
 
-    model = StructuredForest(options, rand=rand)
+    model = StructuredForests(options, rand=rand)
     model.train(bsds500_train("toy"))
     bsds500_test("toy", "edges")

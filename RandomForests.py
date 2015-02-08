@@ -57,7 +57,7 @@ class RandomForest(object):
         n, f = ftrs.shape
         min_child = max(1, self.min_child)
         min_count = max(1, self.min_count, self.min_child)
-        n_class = np.max(lbls) if self.n_class is None else self.n_class
+        n_class = np.max(lbls) + 1 if self.n_class is None else self.n_class
         sub_n = min(n, int(round(5.0 * n / m)) if self.sub_n is None else self.sub_n)
         sub_f = min(f, int(round(math.sqrt(f))) if self.sub_f is None else self.sub_f)
         split = ['gini', 'entropy', 'twoing'].index(self.split)
@@ -107,7 +107,8 @@ class RandomForest(object):
             if discretize is not None:
                 sub_lbls, preds[cid] = discretize(sub_lbls, n_class)
                 sub_lbls = sub_lbls.astype(np.int32, copy=False)
-                assert np.all(0 <= sub_lbls) and np.all(sub_lbls < n_class)
+
+            assert np.all(0 <= sub_lbls) and np.all(sub_lbls < n_class)
 
             pure = np.all(sub_lbls[0] == sub_lbls)
 
