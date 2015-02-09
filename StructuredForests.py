@@ -151,7 +151,7 @@ class StructuredForests(BaseStructuredForests):
             orientation = N.arctan2(dyy * N.sign(-dxy) + 1e-5, dxx)
             orientation[orientation < 0] += N.pi
 
-            dst = non_maximum_supr(dst, orientation, 1, 5, 1.02) / 1.02
+            dst = non_maximum_supr(dst, orientation, 1, 5, 1.02)
 
         return dst
 
