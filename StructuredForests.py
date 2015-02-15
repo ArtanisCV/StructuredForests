@@ -78,15 +78,16 @@ class StructuredForests(BaseStructuredForests):
         self.trained = False
 
         try:
-            model_file = os.path.join(self.forest_dir, self.forest_name)
-            self.model = self.load_model(model_file)
+            self.model = self.load_model()
         except:
             self.model = {}
             print >> sys.stderr, "No model file found. Training is required."
 
         self.rand = rand
 
-    def load_model(self, model_file):
+    def load_model(self):
+        model_file = os.path.join(self.forest_dir, self.forest_name)
+
         with tables.open_file(model_file, filters=self.comp_filt) as mfile:
             model = {
                 "thrs": mfile.get_node("/thrs")[:],
@@ -314,7 +315,7 @@ class StructuredForests(BaseStructuredForests):
         forest_path = os.path.join(self.forest_dir, self.forest_name)
         if os.path.exists(forest_path):
             print "Found model, reusing..."
-            self.model = self.load_model(forest_path)
+            self.model = self.load_model()
             return
 
         trees = []
@@ -404,7 +405,7 @@ class StructuredForests(BaseStructuredForests):
             mfile.create_carray("/", "segs", obj=segs)
             mfile.close()
 
-        self.model = self.load_model(forest_path)
+        self.model = self.load_model()
 
 
 def discretize(segs, n_class, n_sample, rand):
