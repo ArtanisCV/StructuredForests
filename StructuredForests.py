@@ -8,7 +8,7 @@ import numpy as N
 from math import floor, ceil, log
 from scipy.ndimage.morphology import distance_transform_edt
 from BaseStructuredForests import BaseStructuredForests
-from RandomForests import RandomForest
+from RandomForests import RandomForests
 from RobustPCA import robust_pca
 from utils import conv_tri, gradient
 
@@ -261,13 +261,13 @@ class StructuredForests(BaseStructuredForests):
         if not os.path.exists(self.tree_dir):
             os.makedirs(self.tree_dir)
 
-        rf = RandomForest(n_class=self.options["n_class"],
-                          min_count=self.options["min_count"],
-                          min_child=self.options["min_child"],
-                          max_depth=self.options["max_depth"],
-                          split=self.options["split"],
-                          discretize=self.options["discretize"],
-                          rand=self.rand)
+        rf = RandomForests(n_class=self.options["n_class"],
+                           min_count=self.options["min_count"],
+                           min_child=self.options["min_child"],
+                           max_depth=self.options["max_depth"],
+                           split=self.options["split"],
+                           discretize=self.options["discretize"],
+                           rand=self.rand)
 
         for i in xrange(n_tree):
             data_file = self.data_prefix + str(i + 1) + ".h5"

@@ -8,7 +8,7 @@ pyximport.install()
 from _RandomForests import find_threshold
 
 
-class RandomForest(object):
+class RandomForests(object):
     def __init__(self, n_tree=1, n_class=None, sub_n=None, sub_f=None,
                  split='gini', min_count=1, min_child=1, max_depth=64,
                  discretize=None, rand=np.random.RandomState(123)):
