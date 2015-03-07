@@ -485,7 +485,7 @@ def bsds500_train(input_root):
     return data
 
 
-def bsds500_test(input_root, output_root):
+def bsds500_test(model, input_root, output_root):
     from skimage import img_as_float
     from skimage.io import imread, imsave
 
@@ -543,4 +543,4 @@ if __name__ == "__main__":
 
     model = StructuredForests(options, rand=rand)
     model.train(bsds500_train("toy"))
-    bsds500_test("toy", "edges")
+    bsds500_test(model, "toy", "edges")
