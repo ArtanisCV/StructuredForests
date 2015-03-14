@@ -486,7 +486,7 @@ def bsds500_train(input_root):
 
 
 def bsds500_test(model, input_root, output_root):
-    from skimage import img_as_float
+    from skimage import img_as_float, img_as_ubyte
     from skimage.io import imread, imsave
 
     if not os.path.exists(output_root):
@@ -499,7 +499,7 @@ def bsds500_test(model, input_root, output_root):
     for i, file_name in enumerate(file_names):
         img = img_as_float(imread(os.path.join(image_dir, file_name)))
 
-        edge = model.predict(img)
+        edge = img_as_ubyte(model.predict(img))
 
         imsave(os.path.join(output_root, file_name[:-3] + "png"), edge)
 
