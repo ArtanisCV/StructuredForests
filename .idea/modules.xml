@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../CaffeEdge/.idea/CaffeEdge.iml" filepath="$PROJECT_DIR$/../CaffeEdge/.idea/CaffeEdge.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/StructuredForests.iml" filepath="$PROJECT_DIR$/.idea/StructuredForests.iml" />
     </modules>
   </component>

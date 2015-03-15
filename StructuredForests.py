@@ -13,7 +13,8 @@ from RobustPCA import robust_pca
 from utils import conv_tri, gradient
 
 import pyximport
-pyximport.install(setup_args={'include_dirs': N.get_include()})
+pyximport.install(build_dir=".pyxbld",
+                  setup_args={"include_dirs": N.get_include()})
 from _StructuredForests import predict_core, non_maximum_supr
 
 
@@ -164,6 +165,7 @@ class StructuredForests(BaseStructuredForests):
         self.prepare_data(input_data)
         self.train_tree()
         self.merge_trees()
+        self.load_model()
 
     def prepare_data(self, input_data):
         """
@@ -315,7 +317,6 @@ class StructuredForests(BaseStructuredForests):
         forest_path = os.path.join(self.forest_dir, self.forest_name)
         if os.path.exists(forest_path):
             print "Found model, reusing..."
-            self.load_model()
             return
 
         trees = []
@@ -404,8 +405,6 @@ class StructuredForests(BaseStructuredForests):
             mfile.create_carray("/", "n_seg", obj=n_seg)
             mfile.create_carray("/", "segs", obj=segs)
             mfile.close()
-
-        self.load_model()
 
 
 def discretize(segs, n_class, n_sample, rand):

@@ -4,7 +4,8 @@ import cv2
 import numpy as N
 
 import pyximport
-pyximport.install(setup_args={'include_dirs': N.get_include()})
+pyximport.install(build_dir=".pyxbld",
+                  setup_args={"include_dirs": N.get_include()})
 from _utils import histogram_core, pdist_core
 
 

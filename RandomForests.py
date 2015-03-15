@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 import pyximport
-pyximport.install()
+pyximport.install(build_dir=".pyxbld")
 from _RandomForests import find_threshold
 
 
