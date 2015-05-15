@@ -16,7 +16,8 @@ re-installing it by apt-get (for Ubuntu).
 ## Version 1.0
 
 A Python Implementation for Piotr's ICCV Paper "Structured Forests for Fast Edge Detection". The performance is almost
-the same as Piotr's original (Matlab) implementation.
+the same as Piotr's original (Matlab) implementation (On BSDS500, Piotr's: \[ODS=0.738, OIS=0.758, AP=0.795, R50=0.923\],
+mine: \[ODS=0.739, OIS=0.759, AP=0.796, R50=0.924\]).
 
 For the original implementation, please check the author's webpage:
 http://research.microsoft.com/en-us/um/people/larryz/publications.htm
@@ -39,7 +40,8 @@ http://research.microsoft.com/en-us/um/people/larryz/publications.htm
   * Merge trees to build the final model, and save it in "model/forests".
   * Use the trained model to detect edges for the testing data, and save them in "edges".
   * **Note: Currently a model trained on the BSDS500 dataset is provided. If you don't remove it, only the last step of
-    the above will be executed.**
+    the above will be executed. Just for reference, on my machine the performance on "toy" is \[ODS=0.771, OIS=0.781, 
+    AP=0.843, R50=0.936\], if this model is used.**
 
 
 * Actual Usage:
