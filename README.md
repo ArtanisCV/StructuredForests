@@ -71,4 +71,4 @@ http://research.microsoft.com/en-us/um/people/larryz/publications.htm
 I took some C++ codes from Piotr's original implementation. Those codes are licensed as the author required (see the
 author's webpage).
 
-For other codes, they are licensed under the IDC (I don't care) License. O(∩_∩)O.
+For other codes, they are licensed under the BSD License.
